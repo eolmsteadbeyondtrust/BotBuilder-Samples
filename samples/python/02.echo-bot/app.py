@@ -89,9 +89,9 @@ if __name__ == "__main__":
         BOT = EchoBot()
 
         APP = web.Application(middlewares=[aiohttp_error_middleware])
-        APP.router.add_post("/api/messages", messages)
+        APP.router.add_post("/bots/samples/api/messages", messages)
 
-        web.run_app(APP, host="localhost", port=CONFIG.PORT)
+        web.run_app(APP, host="127.0.0.4", port=CONFIG.PORT)
     except Exception as error:
         raise error
     finally:
