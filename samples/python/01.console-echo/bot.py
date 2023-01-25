@@ -13,4 +13,10 @@ class EchoBot:
                 exit(0)
             else:
                 # Echo the message text back to the user.
-                await context.send_activity(f"I heard you say {context.activity.text}")
+                await context.send_activity(f"""I heard you say {context.activity.text}
+
+Type more text or enter a command.
+
+Commands Available:
+    quit
+""")

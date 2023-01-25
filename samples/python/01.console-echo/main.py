@@ -12,8 +12,13 @@ BOT = EchoBot()
 
 LOOP = asyncio.get_event_loop()
 
+import logging
+
 if __name__ == "__main__":
+
     try:
+        logging.basicConfig(level=logging.DEBUG)
+
         # Greet user
         print("Hi... I'm an echobot. Whatever you say I'll echo back.")
 

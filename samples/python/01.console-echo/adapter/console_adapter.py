@@ -18,6 +18,9 @@ from botbuilder.core.turn_context import TurnContext
 from botbuilder.core.bot_adapter import BotAdapter
 
 
+import logging
+log=logging.getLogger(__name__)
+
 class ConsoleAdapter(BotAdapter):
     """
     Lets a user communicate with a bot from a console window.
@@ -42,6 +45,7 @@ class ConsoleAdapter(BotAdapter):
     """
 
     def __init__(self, reference: ConversationReference = None):
+        log.info(f" initializing")
         super(ConsoleAdapter, self).__init__()
 
         self.reference = ConversationReference(
@@ -55,7 +59,7 @@ class ConsoleAdapter(BotAdapter):
         # Warn users to pass in an instance of a ConversationReference, otherwise the parameter will be ignored.
         if reference is not None and not isinstance(reference, ConversationReference):
             warnings.warn(
-                "ConsoleAdapter: `reference` argument is not an instance of ConversationReference and will "
+                "ConsoleAdapter `reference` argument is not an instance of ConversationReference and will "
                 "be ignored."
             )
         else:
@@ -82,12 +86,13 @@ class ConsoleAdapter(BotAdapter):
         :param logic:
         :return:
         """
+        log.info(f" process_activity")
         while True:
             msg = input()
             if msg is None:
                 pass
             else:
-                self._next_id += 1
+                self._next_id += 1 # what is this for?
                 activity = Activity(
                     text=msg,
                     channel_id="console",
@@ -112,20 +117,22 @@ class ConsoleAdapter(BotAdapter):
         :param activities:
         :return:
         """
+        log.info(f" send_activity")
         if context is None:
             raise TypeError(
-                "ConsoleAdapter.send_activities(): `context` argument cannot be None."
+                "ConsoleAdapter.send_activities() `context` argument cannot be None."
             )
         if not isinstance(activities, list):
             raise TypeError(
-                "ConsoleAdapter.send_activities(): `activities` argument must be a list."
+                "ConsoleAdapter.send_activities() `activities` argument must be a list."
             )
         if len(activities) == 0:
             raise ValueError(
-                "ConsoleAdapter.send_activities(): `activities` argument cannot have a length of 0."
+                "ConsoleAdapter.send_activities() `activities` argument cannot have a length of 0."
             )
 
         async def next_activity(i: int):
+            log.info(f" next_activity({i})")
             responses = []
 
             if i < len(activities):
@@ -133,7 +140,9 @@ class ConsoleAdapter(BotAdapter):
                 activity = activities[i]
 
                 if activity.type == "delay":
+                    log.info(f" sleeping for {activity.delay}")
                     await asyncio.sleep(activity.delay)
+                    log.info(f" awaiting next_activity({i+1})")
                     await next_activity(i + 1)
                 elif activity.type == ActivityTypes.message:
                     if (
@@ -148,13 +157,16 @@ class ConsoleAdapter(BotAdapter):
                         print(f"{activity.text} {append}")
                     else:
                         print(activity.text)
+                    log.info(f" awaiting next_activity({i+1})")
                     await next_activity(i + 1)
                 else:
                     print(f"[{activity.type}]")
+                    log.info(f" awaiting next_activity({i+1})")
                     await next_activity(i + 1)
             else:
                 return responses
 
+        log.info(f" awaiting next_activity({0})")
         await next_activity(0)
 
     async def delete_activity(
@@ -167,7 +179,8 @@ class ConsoleAdapter(BotAdapter):
         :param reference:
         :return:
         """
-        raise NotImplementedError("ConsoleAdapter.delete_activity(): not supported.")
+        log.info(f" delete_activity")
+        raise NotImplementedError("ConsoleAdapter.delete_activity() not supported.")
 
     async def update_activity(self, context: TurnContext, activity: Activity):
         """
@@ -177,4 +190,5 @@ class ConsoleAdapter(BotAdapter):
         :param activity:
         :return:
         """
-        raise NotImplementedError("ConsoleAdapter.update_activity(): not supported.")
+        log.info(f" update_activity")
+        raise NotImplementedError("ConsoleAdapter.update_activity() not supported.")

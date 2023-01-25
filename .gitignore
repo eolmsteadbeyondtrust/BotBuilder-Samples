@@ -299,3 +299,6 @@ rush.json
 /experimental/common/scripts
 /experimental/generation/generator/.rush
 orchestrator.json
+
+# venv
+*-venv/

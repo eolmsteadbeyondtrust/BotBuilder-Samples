@@ -19,19 +19,15 @@ from botbuilder.schema import Activity, ActivityTypes
 from bots import EchoBot
 from config import DefaultConfig
 
-CONFIG = DefaultConfig()
-
-# Create adapter.
-# See https://aka.ms/about-bot-adapter to learn more about how bots work.
-SETTINGS = BotFrameworkAdapterSettings(CONFIG.APP_ID, CONFIG.APP_PASSWORD)
-ADAPTER = BotFrameworkAdapter(SETTINGS)
-
-
+import logging
+log=logging.getLogger(__name__)
 # Catch-all for errors.
 async def on_error(context: TurnContext, error: Exception):
     # This check writes out errors to console log .vs. app insights.
     # NOTE: In production environment, you should consider logging this to Azure
     #       application insights.
+    
+    log.info(f" on_error")
     print(f"\n [on_turn_error] unhandled error: {error}", file=sys.stderr)
     traceback.print_exc()
 
@@ -55,14 +51,10 @@ async def on_error(context: TurnContext, error: Exception):
         await context.send_activity(trace_activity)
 
 
-ADAPTER.on_turn_error = on_error
-
-# Create the Bot
-BOT = EchoBot()
-
-
 # Listen for incoming requests on /api/messages
 async def messages(req: Request) -> Response:
+
+    log.info(f" messages")
     # Main bot message handler.
     if "application/json" in req.headers["Content-Type"]:
         body = await req.json()
@@ -78,11 +70,29 @@ async def messages(req: Request) -> Response:
     return Response(status=HTTPStatus.OK)
 
 
-APP = web.Application(middlewares=[aiohttp_error_middleware])
-APP.router.add_post("/api/messages", messages)
-
 if __name__ == "__main__":
     try:
+        logging.basicConfig(level=logging.DEBUG)
+
+        log.info("STARTED")
+
+        CONFIG = DefaultConfig()
+
+        # Create adapter.
+        # See https://aka.ms/about-bot-adapter to learn more about how bots work.
+        SETTINGS = BotFrameworkAdapterSettings(CONFIG.APP_ID, CONFIG.APP_PASSWORD)
+        ADAPTER = BotFrameworkAdapter(SETTINGS)
+
+        ADAPTER.on_turn_error = on_error
+
+        # Create the Bot
+        BOT = EchoBot()
+
+        APP = web.Application(middlewares=[aiohttp_error_middleware])
+        APP.router.add_post("/api/messages", messages)
+
         web.run_app(APP, host="localhost", port=CONFIG.PORT)
     except Exception as error:
         raise error
+    finally:
+        log.info("STOPPED")
